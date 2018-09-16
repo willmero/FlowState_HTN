@@ -10,6 +10,8 @@
 		154C2EC01D3D75E5009F1548 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 154C2EBF1D3D75E5009F1548 /* CoreBluetooth.framework */; };
 		3BA945841BB0A95000AD1F8F /* SimpleController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3BA945811BB0A95000AD1F8F /* SimpleController.xib */; };
 		3BA945851BB0A95000AD1F8F /* SimpleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BA945821BB0A95000AD1F8F /* SimpleController.m */; };
+		421A53B7214E457500057558 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 421A53B6214E457500057558 /* AVFoundation.framework */; };
+		421A53B9214E46F200057558 /* 40HZ.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 421A53B8214E46F200057558 /* 40HZ.mp3 */; };
 		5401E01E1A93DA2600FADC22 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5401E01D1A93DA2600FADC22 /* main.m */; };
 		5401E0211A93DA2600FADC22 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5401E0201A93DA2600FADC22 /* AppDelegate.m */; };
 		5401E0271A93DA2600FADC22 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5401E0251A93DA2600FADC22 /* Main.storyboard */; };
@@ -35,6 +37,9 @@
 		3BA945811BB0A95000AD1F8F /* SimpleController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SimpleController.xib; sourceTree = "<group>"; };
 		3BA945821BB0A95000AD1F8F /* SimpleController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SimpleController.m; sourceTree = "<group>"; };
 		3BA945831BB0A95000AD1F8F /* SimpleController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SimpleController.h; sourceTree = "<group>"; };
+		421A53B6214E457500057558 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		421A53B8214E46F200057558 /* 40HZ.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = 40HZ.mp3; sourceTree = "<group>"; };
+		421A53BC214E4B0800057558 /* MuseStatsIos.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MuseStatsIos.entitlements; sourceTree = "<group>"; };
 		5401E0181A93DA2600FADC22 /* MuseStatsIos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MuseStatsIos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5401E01C1A93DA2600FADC22 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5401E01D1A93DA2600FADC22 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -55,6 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				421A53B7214E457500057558 /* AVFoundation.framework in Frameworks */,
 				154C2EC01D3D75E5009F1548 /* CoreBluetooth.framework in Frameworks */,
 				54C636CE1BCFFDDE00E92C8F /* libc++.tbd in Frameworks */,
 				54C636CD1BCFFD9500E92C8F /* Muse.framework in Frameworks */,
@@ -71,6 +77,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		421A53B5214E457500057558 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				421A53B6214E457500057558 /* AVFoundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5401E00F1A93DA2600FADC22 = {
 			isa = PBXGroup;
 			children = (
@@ -80,6 +94,7 @@
 				5401E01A1A93DA2600FADC22 /* MuseStatsIos */,
 				5401E0341A93DA2600FADC22 /* MuseStatsIosTests */,
 				5401E0191A93DA2600FADC22 /* Products */,
+				421A53B5214E457500057558 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -95,6 +110,7 @@
 		5401E01A1A93DA2600FADC22 /* MuseStatsIos */ = {
 			isa = PBXGroup;
 			children = (
+				421A53BC214E4B0800057558 /* MuseStatsIos.entitlements */,
 				3BA945811BB0A95000AD1F8F /* SimpleController.xib */,
 				3BA945821BB0A95000AD1F8F /* SimpleController.m */,
 				3BA945831BB0A95000AD1F8F /* SimpleController.h */,
@@ -111,6 +127,7 @@
 		5401E01B1A93DA2600FADC22 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				421A53B8214E46F200057558 /* 40HZ.mp3 */,
 				5401E01C1A93DA2600FADC22 /* Info.plist */,
 				5401E01D1A93DA2600FADC22 /* main.m */,
 			);
@@ -186,6 +203,9 @@
 						DevelopmentTeam = TK982KB74D;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.InterAppAudio = {
 								enabled = 0;
 							};
 						};
@@ -222,6 +242,7 @@
 			files = (
 				5401E0271A93DA2600FADC22 /* Main.storyboard in Resources */,
 				5401E02C1A93DA2600FADC22 /* LaunchScreen.xib in Resources */,
+				421A53B9214E46F200057558 /* 40HZ.mp3 in Resources */,
 				5401E0291A93DA2600FADC22 /* Images.xcassets in Resources */,
 				3BA945841BB0A95000AD1F8F /* SimpleController.xib in Resources */,
 			);

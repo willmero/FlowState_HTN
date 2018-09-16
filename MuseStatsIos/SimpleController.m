@@ -1,13 +1,8 @@
-//
-//  SimpleController.m
-//  MuseStatsIos
-//
-//  Created by Yue Huang on 2015-09-01.
-//  Copyright (c) 2015 InteraXon. All rights reserved.
-//
-
 #import "SimpleController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
+#import <QuartzCore/QuartzCore.h>
+#import <AVFoundation/AVFoundation.h>
+#include <math.h>
 
 @interface SimpleController () <CBCentralManagerDelegate>
 @property IXNMuseManagerIos * manager;
@@ -15,6 +10,7 @@
 @property (nonatomic) NSMutableArray* logLines;
 @property (nonatomic) BOOL lastBlink;
 @property (nonatomic) BOOL lastJawClench;
+@property (nonatomic) BOOL isFocused;
 @property (nonatomic, strong) CBCentralManager * btManager;
 @property (atomic) BOOL btState;
 @end
@@ -23,11 +19,30 @@ NSMutableData *_responseData;
 
 @implementation SimpleController
 
+AVAudioPlayer *myAudio;
+UISwitch *mySwitch;
+
+NSString *currentSlackState = nil;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [UIApplication sharedApplication].idleTimerDisabled = YES;
     if (!self.manager) {
         self.manager = [IXNMuseManagerIos sharedManager];
+    }
+    
+    NSTimer* myTimer = [NSTimer scheduledTimerWithTimeInterval: 5.0 target: self
+                                                      selector: @selector(callAfterSixtySecond:) userInfo: nil repeats: YES];
+}
+
+-(void) callAfterSixtySecond:(NSTimer*) t
+{
+    if (_isFocused) {
+        [self startDND];
+        currentSlackState = @"focused";
+    } else {
+        [self endDND];
+        currentSlackState = @"notFocused";
     }
 }
 
@@ -137,6 +152,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
             break;
         case IXNConnectionStateConnected:
             state = @"connected";
+            [_tableView setHidden:YES];
+            [_selectYourDeviceLabel setHidden:YES];
+            [myAudio play];
+            [_bineuralFlipperLabel setHidden:NO];
+            [_bineuralFlipper setHidden:NO];
             break;
         case IXNConnectionStateConnecting:
             state = @"connecting";
@@ -146,12 +166,15 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         default: NSAssert(NO, @"impossible connection state received");
     }
     [self log:@"connect: %@", state];
+    if (state == @"connected") {
+        [self log:@"Start the UI!"];
+    }
 }
 
 - (void) connect {
     [self.muse registerConnectionListener:self];
     [self.muse registerDataListener:self
-                               type:IXNMuseDataPacketTypeBetaRelative];
+                               type:IXNMuseDataPacketTypeGammaRelative];
     /*
     [self.muse registerDataListener:self
                                type:IXNMuseDataPacketTypeEeg];
@@ -161,15 +184,64 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)receiveMuseDataPacket:(IXNMuseDataPacket *)packet
                          muse:(IXNMuse *)muse {
-    if (packet.packetType == IXNMuseDataPacketTypeBetaRelative) {
+    if (packet.packetType == IXNMuseDataPacketTypeGammaRelative) {
         double IXNEegEEG1Value = [packet.values[IXNEegEEG1] doubleValue];
         double IXNEegEEG2Value = [packet.values[IXNEegEEG2] doubleValue];
         double IXNEegEEG3Value = [packet.values[IXNEegEEG3] doubleValue];
         double IXNEegEEG4Value = [packet.values[IXNEegEEG4] doubleValue];
         
         double total = IXNEegEEG1Value + IXNEegEEG2Value + IXNEegEEG3Value + IXNEegEEG4Value;
+        
+        if (isnan(IXNEegEEG1Value)) {
+            [_headPoint1 setHidden:YES];
+        } else {
+            [_headPoint1 setHidden:NO];
+        }
+        
+        if (isnan(IXNEegEEG2Value)) {
+            [_headPoint2 setHidden:YES];
+        } else {
+            [_headPoint2 setHidden:NO];
+        }
+        
+        if (isnan(IXNEegEEG3Value)) {
+            [_headPoint3 setHidden:YES];
+        } else {
+            [_headPoint3 setHidden:NO];
+        }
+        
+        if (isnan(IXNEegEEG4Value)) {
+            [_headPoint4 setHidden:YES];
+        } else {
+            [_headPoint4 setHidden:NO];
+        }
+        
+        if (isnan(total)) {
+            [_pleaseContactLabel setHidden:NO];
+        } else {
+            [_pleaseContactLabel setHidden:YES];
+            [_headPoint1 setHidden:YES];
+            [_headPoint2 setHidden:YES];
+            [_headPoint3 setHidden:YES];
+            [_headPoint4 setHidden:YES];
+            [_endFlowState setHidden:NO];
+            if ([mySwitch isOn]) {
+                [myAudio play];
+            } else if(mySwitch) {
+                [myAudio stop];
+            }
+            
+        }
+        
+        if (total > 1.0) {
+            [_flowStateWarning setHidden:NO];
+            _isFocused = true;
+        } else {
+            [_flowStateWarning setHidden:YES];
+            _isFocused = false;
+        }
 
-        [self log:@"%5.2f", total];
+        [self log:@"%5.2f %5.2f %5.2f %5.2f %5.2f", IXNEegEEG1Value, IXNEegEEG2Value, IXNEegEEG3Value, IXNEegEEG4Value, total];
     }
 }
 
@@ -180,9 +252,29 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (IBAction)disconnect:(id)sender {
     if (self.muse) [self.muse disconnect];
+    [_beginButton setHidden:NO];
+    [_flowStateWarning setHidden:YES];
+    [_endFlowState setHidden:YES];
+    [myAudio stop];
+}
+
+- (IBAction)bineuralToggle:(id)sender {
+    mySwitch = (UISwitch *)sender;
+    if ([mySwitch isOn]) {
+        [myAudio play];
+    } else {
+        [myAudio stop];
+    }
 }
 
 - (IBAction)scan:(id)sender {
+    NSURL *musicFile;
+    musicFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"40HZ" ofType:@"mp3"]];
+    myAudio = [[AVAudioPlayer alloc] initWithContentsOfURL:musicFile error:nil];
+    myAudio.volume = 1.0;
+    [_beginButton setHidden:YES];
+    [_tableView setHidden:NO];
+    [_selectYourDeviceLabel setHidden:NO];
     [self.manager startListening];
     [self.tableView reloadData];
 }
@@ -192,7 +284,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self.tableView reloadData];
 }
 
-- (IBAction)startDND:(id)sender {
+- (void)startDND {
     [self log:@"Starting DND"];
     
 
@@ -238,7 +330,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 }
 
-- (IBAction)endDND:(id)sender {
+- (void)endDND {
     [self log:@"Ending DND"];
     
     

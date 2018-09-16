@@ -5,6 +5,7 @@
 
 #import "AppDelegate.h"
 #import "SimpleController.h"
+#import <AudioToolbox/AudioToolbox.h>
 
 @interface AppDelegate ()
 @property (nonatomic, readonly) SimpleController* simpleController;
