@@ -22,6 +22,22 @@ NSMutableData *_responseData;
 AVAudioPlayer *myAudio;
 UISwitch *mySwitch;
 
+double valueWindow1 = 0.0;
+double valueWindow2 = 0.0;
+double valueWindow3 = 0.0;
+double valueWindow4 = 0.0;
+double valueWindow5 = 0.0;
+double valueWindow6 = 0.0;
+double valueWindow7 = 0.0;
+double valueWindow8 = 0.0;
+double valueWindow9 = 0.0;
+double valueWindow10 = 0.0;
+double valueWindow11 = 0.0;
+double valueWindow12 = 0.0;
+double valueWindow13 = 0.0;
+double valueWindow14 = 0.0;
+double valueWindow15 = 0.0;
+
 NSString *currentSlackState = nil;
 
 - (void)viewDidLoad {
@@ -31,7 +47,7 @@ NSString *currentSlackState = nil;
         self.manager = [IXNMuseManagerIos sharedManager];
     }
     
-    NSTimer* myTimer = [NSTimer scheduledTimerWithTimeInterval: 5.0 target: self
+    NSTimer* myTimer = [NSTimer scheduledTimerWithTimeInterval: 5=.0 target: self
                                                       selector: @selector(callAfterSixtySecond:) userInfo: nil repeats: YES];
 }
 
@@ -39,9 +55,11 @@ NSString *currentSlackState = nil;
 {
     if (_isFocused) {
         [self startDND];
+        [_flowStateWarning setHidden:NO];
         currentSlackState = @"focused";
     } else {
         [self endDND];
+        [_flowStateWarning setHidden:YES];
         currentSlackState = @"notFocused";
     }
 }
@@ -192,6 +210,25 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         
         double total = IXNEegEEG1Value + IXNEegEEG2Value + IXNEegEEG3Value + IXNEegEEG4Value;
         
+        // store the data in the windows
+        valueWindow15 = valueWindow14;
+        valueWindow14 = valueWindow13;
+        valueWindow13 = valueWindow12;
+        valueWindow12 = valueWindow11;
+        valueWindow11 = valueWindow10;
+        valueWindow10 = valueWindow9;
+        valueWindow9 = valueWindow8;
+        valueWindow8 = valueWindow7;
+        valueWindow7 = valueWindow6;
+        valueWindow6 = valueWindow5;
+        valueWindow5 = valueWindow4;
+        valueWindow4 = valueWindow3;
+        valueWindow3 = valueWindow2;
+        valueWindow2 = valueWindow1;
+        valueWindow1 = total;
+        
+        double windowedAverage = (valueWindow1 + valueWindow2 + valueWindow3 + valueWindow4 + valueWindow5 + valueWindow6 + valueWindow7 + valueWindow8 + valueWindow9 + valueWindow10 + valueWindow11 + valueWindow12 + valueWindow13 + valueWindow14 + valueWindow15)/15;
+        
         if (isnan(IXNEegEEG1Value)) {
             [_headPoint1 setHidden:YES];
         } else {
@@ -216,7 +253,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
             [_headPoint4 setHidden:NO];
         }
         
-        if (isnan(total)) {
+        if (isnan(windowedAverage)) {
             [_pleaseContactLabel setHidden:NO];
         } else {
             [_pleaseContactLabel setHidden:YES];
@@ -233,15 +270,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
             
         }
         
-        if (total > 1.0) {
-            [_flowStateWarning setHidden:NO];
+        if (windowedAverage > 0.7) {
             _isFocused = true;
         } else {
-            [_flowStateWarning setHidden:YES];
             _isFocused = false;
         }
 
-        [self log:@"%5.2f %5.2f %5.2f %5.2f %5.2f", IXNEegEEG1Value, IXNEegEEG2Value, IXNEegEEG3Value, IXNEegEEG4Value, total];
+        [self log:@"%5.2f %5.2f %5.2f %5.2f %5.2f %5.2f", IXNEegEEG1Value, IXNEegEEG2Value, IXNEegEEG3Value, IXNEegEEG4Value, total, windowedAverage];
     }
 }
 
@@ -288,7 +323,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self log:@"Starting DND"];
     
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://slack.com/api/dnd.setSnooze?token=xoxp-436066852708-437314676935-436436969205-49c9eea973f6a1ec1d64b2d26859042b&num_minutes=5"]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://slack.com/api/dnd.setSnooze?token=xoxp-436066852708-437314676935-436367237812-ff646434458d1e455e356e4a8a62aa27&num_minutes=5"]];
     
     // Specify that it will be a POST request
     request.HTTPMethod = @"GET";
@@ -298,7 +333,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSMutableDictionary *postDict = [[NSMutableDictionary alloc] init];
     
-    [postDict setValue:@"xoxp-436066852708-437314676935-436436969205-49c9eea973f6a1ec1d64b2d26859042b" forKey:@"token"];
+    [postDict setValue:@"xoxp-436066852708-437314676935-436367237812-ff646434458d1e455e356e4a8a62aa27" forKey:@"token"];
     [postDict setValue:@"5" forKey:@"num_minutes"];
     
     
@@ -334,7 +369,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self log:@"Ending DND"];
     
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://slack.com/api/dnd.endSnooze?token=xoxp-436066852708-437314676935-436436969205-49c9eea973f6a1ec1d64b2d26859042b"]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://slack.com/api/dnd.endSnooze?token=xoxp-436066852708-437314676935-436367237812-ff646434458d1e455e356e4a8a62aa27"]];
     
     // Specify that it will be a POST request
     request.HTTPMethod = @"POST";
@@ -344,7 +379,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSMutableDictionary *postDict = [[NSMutableDictionary alloc] init];
     
-    [postDict setValue:@"xoxp-436066852708-437314676935-436436969205-49c9eea973f6a1ec1d64b2d26859042b" forKey:@"token"];
+    [postDict setValue:@"xoxp-436066852708-437314676935-436367237812-ff646434458d1e455e356e4a8a62aa27" forKey:@"token"];
     
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:postDict options:0 error:nil];
